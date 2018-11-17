@@ -16,6 +16,17 @@ RSpec.describe Miller do
       expect(inst.name).to eq 'John'
       expect(inst.lastname).to eq 'Doe'
     end
+    it "errors when config not set" do
+      klass = Class.new do
+        include Miller.with(:name, :lastname)
+        name 'John'
+        lastname 'Doe'
+      end
+      expect {
+        klass.config.foo
+      }.to raise_error(Miller::ConfigNotSetError)
+      inst = klass.new
+    end
     it 'blocks' do
       klass = Class.new do
         include Miller.with(:name, :lastname)
@@ -73,8 +84,7 @@ RSpec.describe Miller do
       expect(inst.lastname).to eq 'Doe'
     end
     it 'inheritance' do
-      super_klass = Class.new do
-        include Miller.with(:name, :lastname)
+      super_klass = Class.new(Miller.base(:name, :lastname)) do
         name 'John'
         lastname 'Doe'
       end

@@ -1,7 +1,9 @@
+require "erlash"
 require "miller/version"
+require "miller/errors"
 
 module Miller
-  class NilObject; end
+  include Errors
   def self.with(*attrs)
 
     opts = extract_options!(attrs)
@@ -18,6 +20,10 @@ module Miller
         define_method attr do
           get(attr)
         end
+      end
+
+      def method_missing(name, *args, &block)
+        raise ConfigNotSetError, { name: name }
       end
     end
 
@@ -70,12 +76,16 @@ module Miller
         host_class.extend class_methods
         host_class.include instance_module
       end
-      singleton_class.send :define_method, :inherited do |host_class|
-        # return unless self include_module()#
-        # unless dsl.config.empty?
-        binding.pry
+    end
+  end
+
+  def self.base(*args)
+    Class.new do
+      include Miller.with(*args)
+      def self.inherited(host_class)
+        unless config.empty?
           host_class._set_config_from_inheritance(config)
-        # end
+        end
       end
     end
   end
