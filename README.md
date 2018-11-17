@@ -45,16 +45,6 @@ inst.full_name # => 'John Doe'
 
 __IMPORTANT:__ Usually you will create a base class and then inherit from it for clarity as the previous example shows. The following examples are just to explain the features.
 
-### Errors
-
-```ruby
-  class Service
-    include Miller.with(:name, :lastname)
-    name 'John'
-    lastname 'Doe'
-  end
-  Service.config.foo # => Miller::ConfigNotSetError
-```
 ### Blocks
 
 ```ruby
@@ -138,6 +128,17 @@ __WARNING:__ This can be useful but very dangerous please use it carefully.
   inst.name = proc { another_name }
   inst.name # => 'Martha'
   inst.lastname # => 'Doe'
+```
+
+### Errors
+
+```ruby
+  class Service
+    include Miller.with(:name, :lastname)
+    name 'John'
+    lastname 'Doe'
+  end
+  Service.config.foo # => Miller::ConfigNotSetError
 ```
 
 ## Development
