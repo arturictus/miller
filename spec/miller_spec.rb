@@ -4,6 +4,25 @@ RSpec.describe Miller do
   end
 
   describe 'adding DSL to a class' do
+    it 'common example' do
+      dsl = Class.new do
+        include Miller.with(:name, :lastname)
+        def full_name
+          "#{name} #{lastname}"
+        end
+        # write your logic here
+      end
+      klass = Class.new(dsl) do
+        name 'John'
+        lastname 'Doe'
+      end
+      expect(klass.config.name).to eq 'John'
+      expect(klass.config.lastname).to eq 'Doe'
+      inst = klass.new
+      expect(inst.name).to eq 'John'
+      expect(inst.lastname).to eq 'Doe'
+      expect(inst.full_name).to eq 'John Doe'
+    end
     it 'example' do
       klass = Class.new do
         include Miller.with(:name, :lastname)
@@ -25,7 +44,6 @@ RSpec.describe Miller do
       expect {
         klass.config.foo
       }.to raise_error(Miller::ConfigNotSetError)
-      inst = klass.new
     end
     it 'blocks' do
       klass = Class.new do

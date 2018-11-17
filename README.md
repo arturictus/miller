@@ -1,8 +1,7 @@
 # Miller
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/miller`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Write beautiful and descriptive code by adding configurable services with DSLs
+in a quick and easy manner.
 
 ## Installation
 
@@ -22,7 +21,124 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+class ServiceBase
+  include Miller.with(:name, :lastname)
+  def full_name
+    "#{name} #{lastname}"
+  end
+  # write your logic here
+end
+
+class Service < ServiceBase
+  name 'John'
+  lastname 'Doe'
+end
+
+Service.config.name # => 'John'
+Service.config.lastname # => 'Doe'
+inst = Service.new
+inst.name # => 'John'
+inst.lastname # => 'Doe'
+inst.full_name # => 'John Doe'
+```
+
+__IMPORTANT:__ Usually you will create a base class and then inherit from it for clarity as the previous example shows. The following examples are just to explain the features.
+
+### Errors
+
+```ruby
+  class Service
+    include Miller.with(:name, :lastname)
+    name 'John'
+    lastname 'Doe'
+  end
+  Service.config.foo # => Miller::ConfigNotSetError
+```
+### Blocks
+
+```ruby
+  class Service
+    include Miller.with(:name, :lastname)
+    name { another_name }
+    lastname 'Doe'
+
+    def another_name
+      "victor"
+    end
+  end
+  Service.config.name # => Proc
+  Service.config.lastname # => 'Doe'
+  inst = Service.new
+  inst.name # => 'victor'
+  inst.lastname # => 'Doe'
+```
+
+### Default Config
+
+```ruby
+  class Service
+    include Miller.with(:name, :lastname, default_config: { name: 'Henry', lastname: 'Miller' })
+    lastname 'Doe'
+  end
+  Service.config.name # => 'Henry'
+  Service.config.lastname # => 'Doe'
+  inst = Service.new
+  inst.name # => 'Henry'
+  inst.lastname # => 'Doe'
+```
+
+### Inheritance
+
+If you require configs to be inherited by children use the following.
+
+```ruby
+  class ServiceBase < Miller.base(:name, :lastname)
+    name 'John'
+    lastname 'Doe'
+  end
+  class Service < ServiceBase; end
+  Service.config.name # => 'John'
+  Service.config.lastname # => 'Doe'
+  inst = Service.new
+  inst.name # => 'John'
+  inst.lastname # => 'Doe'
+```
+
+### Override at instance level
+
+__WARNING:__ This can be useful but very dangerous please use it carefully.
+
+```ruby
+  class Service
+    include Miller.with(:name, :lastname)
+    name 'John'
+    lastname 'Doe'
+  end
+  Service.config.name # => 'John'
+  Service.config.lastname # => 'Doe'
+  inst = Service.new
+  inst.name = 'Henry'
+  inst.name # => 'Henry'
+  inst.lastname # => 'Doe'
+```
+
+```ruby
+  class Service
+    include Miller.with(:name, :lastname)
+    name 'John'
+    lastname 'Doe'
+    def another_name
+      'Martha'
+    end
+  end
+  Service.config.name # => 'John'
+  Service.config.lastname # => 'Doe'
+  inst = Service.new
+  inst.name = proc { another_name }
+  inst.name # => 'Martha'
+  inst.lastname # => 'Doe'
+```
 
 ## Development
 

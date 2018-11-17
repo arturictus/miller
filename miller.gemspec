@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Artur Panach"]
   spec.email         = ["arturictus@gmail.com"]
 
-  spec.summary       = %q{build DSLs at ease}
-  spec.description   = %q{create DSL and configure them with a simple include}
+  spec.summary       = %q{DSL builder}
+  spec.description   = %q{Write beautiful and descriptive code by adding configurable services with DSLs in a quick and easy manner.}
   spec.homepage      = "http://github.com/arturictus/miller"
   spec.license       = "MIT"
 
