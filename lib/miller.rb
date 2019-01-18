@@ -82,9 +82,9 @@ module Miller
   def self.base(*args)
     Class.new do
       include Miller.with(*args)
-      def self.inherited(host_class)
+      def self.inherited(subclass)
         unless config.empty?
-          host_class._set_config_from_inheritance(config)
+          subclass._set_config_from_inheritance(config.dup)
         end
       end
     end
