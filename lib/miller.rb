@@ -102,3 +102,4 @@ module Miller
     elem.instance_of?(Hash)
   end
 end
+require 'miller/collectable'
