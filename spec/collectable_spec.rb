@@ -1,13 +1,15 @@
 require 'spec_helper'
 module Miller
   RSpec.describe Collectable do
-    class Attribute < Miller.base(:name, :lastname)
-    end
-    class ColBaseExample < Collectable
+    class Attribute < Miller.base(:name, :lastname); end
+    
+    class ColBaseExample
       include Miller.with(:name, :version)
+      include Collectable
       collectable :property, Attribute
       named_collectable :deployment, Attribute
     end
+
     class ColExample < ColBaseExample
       name :my_name
       version "0.1.0"
