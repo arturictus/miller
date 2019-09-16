@@ -18,7 +18,7 @@ module Miller
         singleton_class.define_method setup.method_name do |&block|
           _set_collectable(setup.acc_name, setup.klass, [])
           self._collectables[setup.acc_name] << if block_given?
-                                                  yield(block.call)
+                                                  yield(block.call) # I do not like to execute the block in memory load
                                                 else
                                                   Class.new(setup.klass, &block)
                                                 end

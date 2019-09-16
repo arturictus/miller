@@ -44,6 +44,10 @@ module Miller
       expect(inst._collectables[:deployment_acc][:app].ancestors).to include(Miller::Attribute)
     end
 
+    it 'block defined collectable' do
+      expect(ColExample.storages.first.foo).to eq :bar
+    end
+
     it "own properties" do
       expect(ColExample.config.name).to eq(:my_name)
       expect(ColExample.new.name).to eq(:my_name)
