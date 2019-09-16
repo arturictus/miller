@@ -45,6 +45,8 @@ module Miller
     it "accessors" do
       expect(ColExample.properties.count).to eq 2
       expect(ColExample.new.properties.count).to eq 2
+      expect(ColExample.deployment_acc.count).to eq 2
+      expect(ColExample.new.deployment_acc.count).to eq 2
     end
   end
 end
