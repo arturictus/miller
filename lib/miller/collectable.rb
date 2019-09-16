@@ -1,20 +1,34 @@
 module Miller
   module Collectable
+    class Setup
+      attr_accessor :method_name, :klass, :opts
+      def initialize(method_name, klass, opts)
+        @method_name = method_name
+        @klass = klass
+        @opts = opts
+      end
+
+      def acc_name
+        opts[:acc_name] || "#{method_name}_acc".to_sym
+      end
+    end
     module ClassMethods
-      def collectable(name, klass)
-        singleton_class.define_method name do |&block|
-          _set_collectable(name, klass, [])
-          self._collectables[name] << Class.new(klass, &block)
+      def collectable(method_name, klass, opts = {})
+        setup = Setup.new(method_name, klass, opts)
+        singleton_class.define_method setup.method_name do |&block|
+          _set_collectable(setup.acc_name, setup.klass, [])
+          self._collectables[setup.acc_name] << Class.new(setup.klass, &block)
         end
-        _gen_accessor(name)
+        _gen_accessor(setup)
       end
   
-      def named_collectable(col_name, klass)
-        singleton_class.define_method col_name do |name, &block|
-          _set_collectable(col_name, klass, {})
-          self._collectables[col_name][name] = Class.new(klass, &block)
+      def named_collectable(method_name, klass, opts = {})
+        setup = Setup.new(method_name, klass, opts)
+        singleton_class.define_method setup.method_name do |name, &block|
+          _set_collectable(setup.acc_name, setup.klass, {})
+          self._collectables[setup.acc_name][name] = Class.new(setup.klass, &block)
         end
-        _gen_accessor(col_name)
+        _gen_accessor(setup)
       end
   
       def _set_collectable(name, klass, default)
@@ -22,12 +36,12 @@ module Miller
         self._collectables[name] ||= default 
       end
   
-      def _gen_accessor(name)
-        singleton_class.define_method "#{name}_col" do
-          self._collectables[name]
+      def _gen_accessor(setup)
+        singleton_class.define_method setup.acc_name do
+          self._collectables[setup.acc_name]
         end
-        define_method "#{name}_col" do
-          self.class._collectables[name]
+        define_method setup.acc_name do
+          self.class._collectables[setup.acc_name]
         end
       end
       def _collectables

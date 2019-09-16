@@ -6,7 +6,7 @@ module Miller
     class ColBaseExample
       include Miller.with(:name, :version)
       include Collectable
-      collectable :property, Attribute
+      collectable :property, Attribute, acc_name: :properties
       named_collectable :deployment, Attribute
     end
 
@@ -23,16 +23,19 @@ module Miller
       deployment(:app) do
         name :app
       end
+      deployment(:other_app) do
+        name :other_app
+      end
     end
 
     it "generates proper metadata" do
       inst = ColExample.new
-      expect(ColExample._collectables[:property].count).to eq 2
-      expect(inst._collectables[:property].count).to eq 2
-      expect(inst._collectables[:property].first.ancestors).to include(Miller::Attribute)
-      expect(ColExample._collectables[:deployment][:app]).not_to be_nil
-      expect(inst._collectables[:deployment][:app]).not_to be_nil
-      expect(inst._collectables[:deployment][:app].ancestors).to include(Miller::Attribute)
+      expect(ColExample._collectables[:properties].count).to eq 2
+      expect(inst._collectables[:properties].count).to eq 2
+      expect(inst._collectables[:properties].first.ancestors).to include(Miller::Attribute)
+      expect(ColExample._collectables[:deployment_acc][:app]).not_to be_nil
+      expect(inst._collectables[:deployment_acc][:app]).not_to be_nil
+      expect(inst._collectables[:deployment_acc][:app].ancestors).to include(Miller::Attribute)
     end
 
     it "own properties" do
@@ -40,8 +43,8 @@ module Miller
       expect(ColExample.new.name).to eq(:my_name)
     end
     it "accessors" do
-      expect(ColExample.property_col.count).to eq 2
-      expect(ColExample.new.property_col.count).to eq 2
+      expect(ColExample.properties.count).to eq 2
+      expect(ColExample.new.properties.count).to eq 2
     end
   end
 end
