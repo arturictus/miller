@@ -12,13 +12,19 @@ module Miller
         opts[:acc_name] || "#{method_name}_acc".to_sym
       end
     end
+    class BlockDefinition < Struct.new(:definion_block, :block) do
+
+      def call
+        definion_block.call(block.call)
+      end
+    end
     module ClassMethods
-      def collectable(method_name, opts = {})
+      def collectable(method_name, opts = {}, &definition_block)
         setup = Setup.new(method_name, opts)
         singleton_class.define_method setup.method_name do |&block|
           _set_collectable(setup.acc_name, setup.klass, [])
-          self._collectables[setup.acc_name] << if block_given?
-                                                  yield(block.call) # I do not like to execute the block in memory load
+          self._collectables[setup.acc_name] << if definition_block
+                                                  BlockDefinition.new(definition_block, block) # I do not like to execute the block in memory load
                                                 else
                                                   Class.new(setup.klass, &block)
                                                 end
