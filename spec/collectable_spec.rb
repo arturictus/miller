@@ -6,8 +6,11 @@ module Miller
     class ColBaseExample
       include Miller.with(:name, :version)
       include Collectable
-      collectable :property, Attribute, acc_name: :properties
-      named_collectable :deployment, Attribute
+      collectable :property, parent: Attribute, acc_name: :properties
+      named_collectable :deployment, parent: Attribute
+      collectable :storage, acc_name: :storages do |input|
+        OpenStruct.new(input)
+      end
     end
 
     class ColExample < ColBaseExample
@@ -19,6 +22,9 @@ module Miller
       end
       property do
         name "bye"
+      end
+      storage do
+        {foo: :bar}
       end
       deployment(:app) do
         name :app
