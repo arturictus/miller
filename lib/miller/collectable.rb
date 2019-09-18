@@ -1,7 +1,7 @@
 module Miller
   module Collectable
     class Setup
-      attr_reader :method_name, :klass, :opts
+      attr_reader :method_name, :opts
       attr_accessor :callee_opts, :setup_block
       def initialize(method_name, *args)
         @method_name = method_name
@@ -48,7 +48,7 @@ module Miller
         else
           raise ParentClassNotProvided.new(self) unless parent_class
           raise BlockNotProvided.new(self) unless block
-          Class.new(klass, &block)
+          Class.new(parent_class, &block)
         end
       end
     end
@@ -71,7 +71,7 @@ module Miller
       
       def _define_collectable(setup)
         singleton_class.define_method setup.method_name do |*args, &block|
-          _set_collectable(setup.acc_name, setup.klass, setup.default_acc)
+          _set_collectable(setup)
           if setup.type == :named_collectable
             name = args.shift
             raise InvalidNameError.new(setup) unless name
@@ -83,9 +83,9 @@ module Miller
         _gen_accessor(setup)
       end
       
-      def _set_collectable(name, klass, default)
+      def _set_collectable(setup)
         self._collectables ||= {}
-        self._collectables[name] ||= default 
+        self._collectables[setup.acc_name] ||= setup.default_acc 
       end
   
       def _gen_accessor(setup)
