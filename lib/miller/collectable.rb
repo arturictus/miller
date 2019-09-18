@@ -1,53 +1,5 @@
 module Miller
   module Collectable
-    class Error < StandardError
-      def initialize(setup)
-        @setup = setup
-        super(_gen_message)
-      end
-
-      def _gen_message
-        raise NotImplementedError
-      end
-    end
-    class ParentClassNotProvided < Error
-      def _gen_message
-"Provide Parent class as second argument or block to define your own implementation
-
-example:
-
-    #{@setup.type} #{@setup.method_name}, ParentClass
-
-    # or
-
-    #{@setup.type} #{@setup.method_name} do |hash|
-      OpenStruct.new(hash)
-    end" 
-      end
-    end
-    class BlockNotProvided < Error
-      def _gen_message
-"Provide block to set the proper configs
-
-example:
- 
-    #{@setup.method_name.to_s}(:admin) do
-      username 'John'
-      password 'qwerty'
-    end"
-      end
-    end
-    class InvalidNameError < Error
-      def _gen_message
-"Provide block to set the proper configs
-
-example:
- 
-    #{@setup.method_name.to_s}(:admin) do
-      # something
-    end"
-      end
-    end
     class Setup
       attr_reader :method_name, :klass, :opts
       attr_accessor :callee_opts, :setup_block
@@ -106,7 +58,7 @@ example:
                   s.callee_opts = {_called_method: __method__}
                   s.setup_block = block
                 end
-        define_collectable(setup)
+        _define_collectable(setup)
       end
   
       def named_collectable(*args, &block)
@@ -114,10 +66,10 @@ example:
           s.callee_opts = {_called_method: __method__}
           s.setup_block = block
         end
-        define_collectable(setup)
+        _define_collectable(setup)
       end
       
-      def define_collectable(setup)
+      def _define_collectable(setup)
         singleton_class.define_method setup.method_name do |*args, &block|
           _set_collectable(setup.acc_name, setup.klass, setup.default_acc)
           if setup.type == :named_collectable
@@ -161,4 +113,5 @@ example:
       base.include InstanceMethods
     end
   end
-end 
+end
+require_relative './collectable/errors'
