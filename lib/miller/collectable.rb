@@ -22,15 +22,15 @@ module Miller
       end
 
       def type
-        callee_opts[:_called_method]
+        callee_opts[:type]
       end
 
       def default_acc
-        if type == :named_collectable
-          {}
-        else
-          []
-        end
+        type == :named_collectable ? {} : []
+      end
+
+      def registry
+        opts[:acc_class] ? opts[:acc_class].new : default_acc
       end
 
       def parent_class
@@ -43,7 +43,7 @@ module Miller
           if block
             proc { setup_block.call(block.call(*args)) }
           else
-            setup_block.call(*args)
+            proc { setup_block.call(*args) }
           end
         else
           raise ParentClassNotProvided.new(self) unless parent_class
@@ -55,7 +55,7 @@ module Miller
     module ClassMethods
       def collectable(*args, &block)
         setup = Setup.new(*args).tap do |s| 
-                  s.callee_opts = {_called_method: __method__}
+                  s.callee_opts = {type: __method__}
                   s.setup_block = block
                 end
         _define_collectable(setup)
@@ -63,9 +63,9 @@ module Miller
   
       def named_collectable(*args, &block)
         setup = Setup.new(*args).tap do |s| 
-          s.callee_opts = {_called_method: __method__}
-          s.setup_block = block
-        end
+                  s.callee_opts = {type: __method__}
+                  s.setup_block = block
+                end
         _define_collectable(setup)
       end
       
@@ -84,8 +84,8 @@ module Miller
       end
       
       def _set_collectable(setup)
-        self._collectables ||= {}
-        self._collectables[setup.acc_name] ||= setup.default_acc 
+        self._collectables[setup.acc_name] ||= setup.registry
+        self._collectable_setups << [setup.method_name, setup]
       end
   
       def _gen_accessor(setup)
@@ -101,10 +101,24 @@ module Miller
       def _collectables
         @_collectables ||= { }
       end
+      def _collectable_setups
+        @_collectable_setups ||= []
+      end
+
+      # def initialize_callback(setup, e)
+      #   if e.is_a?(Proc)
+      #     e.call(self, {})
+      #   else
+      #     e.new(self, {})
+      #   end
+      # end
     end
     module InstanceMethods
       def _collectables
         self.class._collectables
+      end
+      def _collectable_setups
+        self.class._collectable_setups
       end
     end
 

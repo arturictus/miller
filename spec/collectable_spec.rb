@@ -2,7 +2,9 @@ require 'spec_helper'
 module Miller
   RSpec.describe Collectable do
     class Attribute < Miller.base(:name, :lastname); end
-    
+    class NamedRegistryExample < Hash; end
+    class RegistryExample < Array; end
+
     class ColBaseExample
       include Miller.with(:name, :version)
       include Collectable
@@ -14,6 +16,8 @@ module Miller
       named_collectable :named_user, acc_name: :named_users do |elems|
         OpenStruct.new(elems)
       end
+      collectable(:array_registry, acc_class: RegistryExample) { |e| e }
+      named_collectable(:hash_registry, acc_class: NamedRegistryExample) { |e| e }
     end
 
     class ColExample < ColBaseExample
@@ -37,6 +41,8 @@ module Miller
       named_user :paul do
         { id: 4 }
       end
+      array_registry 'foo'
+      hash_registry :foo, 'elem'
     end
 
     it "generates proper metadata" do
@@ -56,10 +62,24 @@ module Miller
 
     it 'blocks' do
       inst = ColExample.new
-      expect(ColExample._collectables[:users].first.foo).to be :bar
-      expect(inst._collectables[:named_users][:john].id).to be 2
+      expect(ColExample._collectables[:users].first.call.foo).to be :bar
+      expect(inst._collectables[:named_users][:john].call.id).to be 2
       expect(ColExample._collectables[:named_users][:paul]).to be_a Proc
       expect(inst._collectables[:named_users][:paul].call).to be_a OpenStruct
+      expect(inst._collectables[:named_users][:paul].call.id).to be 4
+    end
+
+    it 'custom registry' do
+      inst = ColExample.new
+      expect(ColExample._collectables[:array_registry_acc]).to be_a RegistryExample
+      expect(ColExample._collectables[:array_registry_acc].first.call).to eq 'foo'
+      expect(ColExample._collectables[:hash_registry_acc]).to be_a NamedRegistryExample
+      expect(ColExample._collectables[:hash_registry_acc][:foo].call).to eq 'elem'
+    end
+
+    it '_collectable_setups' do
+      setups = ColExample._collectable_setups
+      expect(setups.all?{ |e| e[1].is_a?(Miller::Collectable::Setup) }).to be true
     end
 
     it "accessors" do
