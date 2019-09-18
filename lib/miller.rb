@@ -38,7 +38,14 @@ module Miller
       end
 
       attrs.each do |attr|
-        define_method attr do |val = nil, &block|
+        define_method attr do |*args, &block|
+          val = if args.count == 1
+                  args.first
+                elsif args.count == 0
+                  true
+                else 
+                  args
+                end
           config.set(attr, (block || val))
         end
       end

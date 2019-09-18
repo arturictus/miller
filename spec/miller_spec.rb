@@ -113,5 +113,18 @@ RSpec.describe Miller do
       expect(inst.name).to eq 'John'
       expect(inst.lastname).to eq 'Doe'
     end
+    it 'multiple arguments' do
+      klass = Class.new(Miller.base(:names, :tags, :cache)) do
+        names 'John', "John"
+        tags foo: :bar
+        cache
+      end
+      expect(klass.config.names).to eq ['John', 'John']
+      expect(klass.new.names).to eq ['John', 'John']
+      expect(klass.config.tags).to eq({foo: :bar})
+      expect(klass.new.tags).to eq({foo: :bar})
+      expect(klass.config.cache).to eq(true)
+      expect(klass.new.cache).to eq(true)
+    end
   end
 end
